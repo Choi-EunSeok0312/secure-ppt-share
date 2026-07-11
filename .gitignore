@@ -1,0 +1,22 @@
+# Ignore node dependencies
+node_modules/
+**/node_modules/
+
+# Ignore Next.js build output
+.next/
+**/.next/
+
+# Ignore backend uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Ignore environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
