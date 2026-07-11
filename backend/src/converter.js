@@ -142,6 +142,13 @@ function extractPHCoords(xmlContent, phMap) {
     const offMatch = shapeContent.match(/<a:off\s+([^>]*?)>/) || shapeContent.match(/<off\s+([^>]*?)>/);
     const extMatch = shapeContent.match(/<a:ext\s+([^>]*?)>/) || shapeContent.match(/<ext\s+([^>]*?)>/);
     
+    let anchor = 't';
+    const anchorMatch = shapeContent.match(/<a:bodyPr[^>]*?anchor="([^"]+)"/) || shapeContent.match(/<bodyPr[^>]*?anchor="([^"]+)"/);
+    if (anchorMatch) {
+      if (anchorMatch[1] === 'b') anchor = 'b';
+      else if (anchorMatch[1] === 'ctr') anchor = 'ctr';
+    }
+    
     if (offMatch && extMatch) {
       const xAttr = offMatch[1].match(/x="(-?\d+)"/);
       const yAttr = offMatch[1].match(/y="(-?\d+)"/);
@@ -153,7 +160,8 @@ function extractPHCoords(xmlContent, phMap) {
           x: parseInt(xAttr[1], 10),
           y: parseInt(yAttr[1], 10),
           w: parseInt(cxAttr[1], 10),
-          h: parseInt(cyAttr[1], 10)
+          h: parseInt(cyAttr[1], 10),
+          anchor: anchor
         };
         
         if (typeMatch) phMap[typeMatch[1]] = coords;
@@ -230,6 +238,9 @@ function parseBackgroundElements(zip, xmlContent, relsMap, slideWidth, slideHeig
     const geomMatch = shapeContent.match(/<a:prstGeom\s+prst="([^"]+)"/) || shapeContent.match(/<prstGeom\s+prst="([^"]+)"/);
     const shapeGeom = geomMatch ? geomMatch[1] : 'rect';
     
+    const rotMatch = shapeContent.match(/rot="(\d+)"/) || shapeContent.match(/<a:xfrm[^>]*?rot="(\d+)"/);
+    const rotation = rotMatch ? Math.round(parseInt(rotMatch[1], 10) / 60000) : 0;
+    
     elementCounter++;
     elements.push({
       id: `bg-shape-${elementCounter}`,
@@ -243,6 +254,7 @@ function parseBackgroundElements(zip, xmlContent, relsMap, slideWidth, slideHeig
       color: fillColor,
       text: '',
       border: '',
+      rotation: rotation,
       animation: 'fade-in',
       step: 0
     });
@@ -281,6 +293,9 @@ function parseBackgroundElements(zip, xmlContent, relsMap, slideWidth, slideHeig
       imgDataUrl = relsMap[rId] || null;
     }
     
+    const rotMatch = picContent.match(/rot="(\d+)"/) || picContent.match(/<a:xfrm[^>]*?rot="(\d+)"/);
+    const rotation = rotMatch ? Math.round(parseInt(rotMatch[1], 10) / 60000) : 0;
+    
     if (imgDataUrl) {
       elementCounter++;
       elements.push({
@@ -291,6 +306,7 @@ function parseBackgroundElements(zip, xmlContent, relsMap, slideWidth, slideHeig
         y: pctY,
         w: pctW,
         h: pctH,
+        rotation: rotation,
         animation: 'fade-in',
         step: 0
       });
@@ -450,6 +466,7 @@ function parsePptxFile(filePath, title) {
         const shapeContent = match[1];
         
         let shapeX = null, shapeY = null, shapeW = null, shapeH = null;
+        let shapeAnchor = 't';
         
         // Check if placeholder
         const phMatch = shapeContent.match(/<p:ph\s+([^>]*?)>/) || shapeContent.match(/<ph\s+([^>]*?)>/);
@@ -463,39 +480,48 @@ function parsePptxFile(filePath, title) {
           if (idxMatch) phIdx = idxMatch[1];
         }
         
-        // Get coordinates from local shape XML
-        const offMatch = shapeContent.match(/<a:off\s+([^>]*?)>/) || shapeContent.match(/<off\s+([^>]*?)>/);
-        const extMatch = shapeContent.match(/<a:ext\s+([^>]*?)>/) || shapeContent.match(/<ext\s+([^>]*?)>/);
-        
-        if (offMatch && extMatch) {
-          const offAttrs = offMatch[1];
-          const extAttrs = extMatch[1];
-          
-          const xAttr = offAttrs.match(/x="(-?\d+)"/);
-          const yAttr = offAttrs.match(/y="(-?\d+)"/);
-          const cxAttr = extAttrs.match(/cx="(\d+)"/);
-          const cyAttr = extAttrs.match(/cy="(\d+)"/);
-          
-          if (xAttr && yAttr && cxAttr && cyAttr) {
-            shapeX = parseInt(xAttr[1], 10);
-            shapeY = parseInt(yAttr[1], 10);
-            shapeW = parseInt(cxAttr[1], 10);
-            shapeH = parseInt(cyAttr[1], 10);
-          }
-        }
-        
-        // Fallback to Layout placeholder coordinates if slide XML contains no coordinates or default zero coordinate
-        if (phMatch && (shapeX === null || shapeX === 0 || shapeY === null || shapeY === 0)) {
+        // Priority check: always use layout placeholder geometry if layout is mapped
+        if (phMatch) {
           const phCoords = (phIdx !== null ? layoutPlaceholders[phIdx] : null) || (phType !== null ? layoutPlaceholders[phType] : null);
           if (phCoords) {
             shapeX = phCoords.x;
             shapeY = phCoords.y;
             shapeW = phCoords.w;
             shapeH = phCoords.h;
+            shapeAnchor = phCoords.anchor || 't';
           }
         }
         
-        // Skip shape if we absolutely cannot resolve its layout boundaries
+        // Fallback: If not matching layout, read local coordinates
+        if (shapeX === null || shapeY === null) {
+          const offMatch = shapeContent.match(/<a:off\s+([^>]*?)>/) || shapeContent.match(/<off\s+([^>]*?)>/);
+          const extMatch = shapeContent.match(/<a:ext\s+([^>]*?)>/) || shapeContent.match(/<ext\s+([^>]*?)>/);
+          
+          if (offMatch && extMatch) {
+            const offAttrs = offMatch[1];
+            const extAttrs = extMatch[1];
+            
+            const xAttr = offAttrs.match(/x="(-?\d+)"/);
+            const yAttr = offAttrs.match(/y="(-?\d+)"/);
+            const cxAttr = extAttrs.match(/cx="(\d+)"/);
+            const cyAttr = extAttrs.match(/cy="(\d+)"/);
+            
+            if (xAttr && yAttr && cxAttr && cyAttr) {
+              shapeX = parseInt(xAttr[1], 10);
+              shapeY = parseInt(yAttr[1], 10);
+              shapeW = parseInt(cxAttr[1], 10);
+              shapeH = parseInt(cyAttr[1], 10);
+            }
+          }
+        }
+        
+        // Check if local layout anchor overrides placeholder alignment
+        const localAnchorMatch = shapeContent.match(/<a:bodyPr[^>]*?anchor="([^"]+)"/) || shapeContent.match(/<bodyPr[^>]*?anchor="([^"]+)"/);
+        if (localAnchorMatch) {
+          if (localAnchorMatch[1] === 'b') shapeAnchor = 'b';
+          else if (localAnchorMatch[1] === 'ctr') shapeAnchor = 'ctr';
+        }
+        
         if (shapeX === null || shapeY === null || shapeW === null || shapeH === null) {
           continue;
         }
@@ -534,6 +560,9 @@ function parsePptxFile(filePath, title) {
         
         const geomMatch = shapeContent.match(/<a:prstGeom\s+prst="([^"]+)"/) || shapeContent.match(/<prstGeom\s+prst="([^"]+)"/);
         const shapeGeom = geomMatch ? geomMatch[1] : 'rect';
+        
+        const rotMatch = shapeContent.match(/rot="(\d+)"/) || shapeContent.match(/<a:xfrm[^>]*?rot="(\d+)"/);
+        const rotation = rotMatch ? Math.round(parseInt(rotMatch[1], 10) / 60000) : 0;
         
         const pRegex = /<a:p>([\s\S]*?)<\/a:p>/g;
         let pMatch;
@@ -599,6 +628,7 @@ function parsePptxFile(filePath, title) {
               color: fillColor,
               text: '',
               border: '',
+              rotation: rotation,
               animation: 'fade-in',
               step: step
             });
@@ -613,6 +643,8 @@ function parsePptxFile(filePath, title) {
           y: pctY,
           w: pctW,
           h: pctH,
+          anchor: shapeAnchor,
+          rotation: rotation,
           paragraphs: parsedParagraphs,
           animation: 'fade-in',
           step: step
@@ -660,6 +692,9 @@ function parsePptxFile(filePath, title) {
               imgDataUrl = relsMap[rId] || null;
             }
             
+            const rotMatch = picContent.match(/rot="(\d+)"/) || picContent.match(/<a:xfrm[^>]*?rot="(\d+)"/);
+            const rotation = rotMatch ? Math.round(parseInt(rotMatch[1], 10) / 60000) : 0;
+            
             elementCounter++;
             if (imgDataUrl) {
               elements.push({
@@ -670,6 +705,7 @@ function parsePptxFile(filePath, title) {
                 y: pctY,
                 w: pctW,
                 h: pctH,
+                rotation: rotation,
                 animation: 'fade-in',
                 step: stepCounter++
               });

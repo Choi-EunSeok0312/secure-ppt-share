@@ -508,6 +508,9 @@ export default function LecturerPage() {
                       } else if (el.geom && (el.geom.includes('round') || el.geom.includes('pill'))) {
                         borderRadius = '9999px';
                       }
+                      const transformStyle = el.rotation 
+                        ? `rotate(${el.rotation}deg)${isVisible ? '' : ' scale(0.95)'}`
+                        : (isVisible ? undefined : 'scale(0.95)');
                       return (
                         <div 
                           key={el.id}
@@ -520,7 +523,8 @@ export default function LecturerPage() {
                             width: `${el.w}%`, 
                             height: `${el.h}%`, 
                             backgroundColor: el.color,
-                            borderRadius: hasBorder ? undefined : borderRadius
+                            borderRadius: hasBorder ? undefined : borderRadius,
+                            transform: transformStyle
                           }}
                         >
                           {el.text}
@@ -528,6 +532,9 @@ export default function LecturerPage() {
                       );
                     }
                     if (el.type === 'image') {
+                      const transformStyle = el.rotation 
+                        ? `rotate(${el.rotation}deg)${isVisible ? '' : ' scale(0.95)'}`
+                        : (isVisible ? undefined : 'scale(0.95)');
                       return (
                         <div
                           key={el.id}
@@ -536,7 +543,8 @@ export default function LecturerPage() {
                             left: `${el.x}%`,
                             top: `${el.y}%`,
                             width: `${el.w}%`,
-                            height: `${el.h}%`
+                            height: `${el.h}%`,
+                            transform: transformStyle
                           }}
                         >
                           <img 
@@ -549,15 +557,22 @@ export default function LecturerPage() {
                       );
                     }
                     if (el.type === 'richText') {
+                      let justifyClass = 'justify-start';
+                      if (el.anchor === 'b') justifyClass = 'justify-end';
+                      else if (el.anchor === 'ctr') justifyClass = 'justify-center';
+                      const transformStyle = el.rotation 
+                        ? `rotate(${el.rotation}deg)${isVisible ? '' : ' scale(0.95)'}`
+                        : (isVisible ? undefined : 'scale(0.95)');
                       return (
                         <div
                           key={el.id}
-                          className={`absolute transition-all duration-500 flex flex-col justify-start text-left leading-relaxed ${opacityClass}`}
+                          className={`absolute transition-all duration-500 flex flex-col ${justifyClass} text-left leading-relaxed ${opacityClass}`}
                           style={{
                             left: `${el.x}%`,
                             top: `${el.y}%`,
                             width: `${el.w}%`,
-                            height: `${el.h}%`
+                            height: `${el.h}%`,
+                            transform: transformStyle
                           }}
                         >
                           {el.paragraphs.map((p, pIdx) => {
