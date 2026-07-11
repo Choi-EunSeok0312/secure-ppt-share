@@ -681,6 +681,8 @@ export default function LecturerPage() {
                       const transformStyle = el.rotation 
                         ? `rotate(${el.rotation}deg)${isVisible ? '' : ' scale(0.95)'}`
                         : (isVisible ? undefined : 'scale(0.95)');
+                      // Background images always render at full size with cover, inline images use contain
+                      const objectFit = el.isBackground ? 'object-cover' : 'object-contain';
                       return (
                         <div
                           key={el.id}
@@ -690,13 +692,14 @@ export default function LecturerPage() {
                             top: `${el.y}%`,
                             width: `${el.w}%`,
                             height: `${el.h}%`,
-                            transform: transformStyle
+                            transform: transformStyle,
+                            zIndex: el.isBackground ? 0 : 1
                           }}
                         >
                           <img 
                             src={el.content} 
-                            alt="Slide Graphic Asset" 
-                            className="w-full h-full object-contain pointer-events-none select-none"
+                            alt={el.isBackground ? 'Slide Background' : 'Slide Graphic Asset'} 
+                            className={`w-full h-full ${objectFit} pointer-events-none select-none`}
                             style={{ userSelect: 'none', WebkitUserDrag: 'none' }}
                           />
                         </div>

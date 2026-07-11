@@ -415,20 +415,15 @@ function parseBackgroundElements(zip, xmlContent, relsMap, slideWidth, slideHeig
   while ((picMatch = picRegex.exec(xmlContent)) !== null) {
     const picContent = picMatch[1];
     
-    const offMatch = picContent.match(/<a:off\s+([^>]*?)>/) || picContent.match(/<off\s+([^>]*?)>/);
-    const extMatch = picContent.match(/<a:ext\s+([^>]*?)>/) || picContent.match(/<ext\s+([^>]*?)>/);
-    if (!offMatch || !extMatch) continue;
+    // Specifically match geometry coordinates (cx/cy), not extLst uri attributes
+    const xfrmOffMatch = picContent.match(/<a:off\s+x="(-?\d+)"\s+y="(-?\d+)"/);
+    const xfrmExtMatch = picContent.match(/<a:ext\s+cx="(\d+)"\s+cy="(\d+)"/);
+    if (!xfrmOffMatch || !xfrmExtMatch) continue;
     
-    const xAttr = offMatch[1].match(/x="(-?\d+)"/);
-    const yAttr = offMatch[1].match(/y="(-?\d+)"/);
-    const cxAttr = extMatch[1].match(/cx="(\d+)"/);
-    const cyAttr = extMatch[1].match(/cy="(\d+)"/);
-    if (!xAttr || !yAttr || !cxAttr || !cyAttr) continue;
-    
-    const rawX = parseInt(xAttr[1], 10);
-    const rawY = parseInt(yAttr[1], 10);
-    const rawW = parseInt(cxAttr[1], 10);
-    const rawH = parseInt(cyAttr[1], 10);
+    const rawX = parseInt(xfrmOffMatch[1], 10);
+    const rawY = parseInt(xfrmOffMatch[2], 10);
+    const rawW = parseInt(xfrmExtMatch[1], 10);
+    const rawH = parseInt(xfrmExtMatch[2], 10);
     
     let pctX = Math.round((rawX / slideWidth) * 100);
     let pctY = Math.round((rawY / slideHeight) * 100);
@@ -442,7 +437,7 @@ function parseBackgroundElements(zip, xmlContent, relsMap, slideWidth, slideHeig
       imgDataUrl = relsMap[rId] || null;
     }
     
-    const rotMatch = picContent.match(/rot="(\d+)"/) || picContent.match(/<a:xfrm[^>]*?rot="(\d+)"/);
+    const rotMatch = picContent.match(/<a:xfrm[^>]*rot="(\d+)"/);
     const rotation = rotMatch ? Math.round(parseInt(rotMatch[1], 10) / 60000) : 0;
     
     if (imgDataUrl) {
@@ -455,6 +450,7 @@ function parseBackgroundElements(zip, xmlContent, relsMap, slideWidth, slideHeig
         y: pctY,
         w: pctW,
         h: pctH,
+        isBackground: rawX === 0 && rawY === 0 && rawW >= slideWidth * 0.95,
         rotation: rotation,
         animation: 'fade-in',
         step: 0
@@ -646,24 +642,15 @@ function parsePptxFile(filePath, title) {
         }
         
         // 1. Get coordinates from local shape XML if present
-        const offMatch = shapeContent.match(/<a:off\s+([^>]*?)>/) || shapeContent.match(/<off\s+([^>]*?)>/);
-        const extMatch = shapeContent.match(/<a:ext\s+([^>]*?)>/) || shapeContent.match(/<ext\s+([^>]*?)>/);
+        // Use specific patterns that match geometry attributes (cx/cy), NOT extLst uri= attributes
+        const offGeoMatch = shapeContent.match(/<a:off\s+x="(-?\d+)"\s+y="(-?\d+)"/);
+        const extGeoMatch = shapeContent.match(/<a:ext\s+cx="(\d+)"\s+cy="(\d+)"/);
         
-        if (offMatch && extMatch) {
-          const offAttrs = offMatch[1];
-          const extAttrs = extMatch[1];
-          
-          const xAttr = offAttrs.match(/x="(-?\d+)"/);
-          const yAttr = offAttrs.match(/y="(-?\d+)"/);
-          const cxAttr = extAttrs.match(/cx="(\d+)"/);
-          const cyAttr = extAttrs.match(/cy="(\d+)"/);
-          
-          if (xAttr && yAttr && cxAttr && cyAttr) {
-            shapeX = parseInt(xAttr[1], 10);
-            shapeY = parseInt(yAttr[1], 10);
-            shapeW = parseInt(cxAttr[1], 10);
-            shapeH = parseInt(cyAttr[1], 10);
-          }
+        if (offGeoMatch && extGeoMatch) {
+          shapeX = parseInt(offGeoMatch[1], 10);
+          shapeY = parseInt(offGeoMatch[2], 10);
+          shapeW = parseInt(extGeoMatch[1], 10);
+          shapeH = parseInt(extGeoMatch[2], 10);
         }
         
         // 2. Fallback to Layout placeholder coordinates only if slide XML contains no coordinates or default zero coordinate
@@ -836,74 +823,70 @@ function parsePptxFile(filePath, title) {
       while ((picMatch = picRegex.exec(slideXml)) !== null) {
         const picContent = picMatch[1];
         
-        const offMatch = picContent.match(/<a:off\s+([^>]*?)>/) || picContent.match(/<off\s+([^>]*?)>/);
-        const extMatch = picContent.match(/<a:ext\s+([^>]*?)>/) || picContent.match(/<ext\s+([^>]*?)>/);
+        // Must specifically match the geometry <a:off> and <a:ext cx=...> (not extLst uri= attributes)
+        const offMatch = picContent.match(/<a:off\s+x="/);
+        const extCxMatch = picContent.match(/<a:ext\s+cx="(\d+)"\s+cy="(\d+)"/);
         
-        if (offMatch && extMatch) {
-          const offAttrs = offMatch[1];
-          const extAttrs = extMatch[1];
+        if (offMatch && extCxMatch) {
+          const xMatch = picContent.match(/<a:off\s+x="(-?\d+)"\s+y="(-?\d+)"/);
+          const rawX = xMatch ? parseInt(xMatch[1], 10) : 0;
+          const rawY = xMatch ? parseInt(xMatch[2], 10) : 0;
+          const rawW = parseInt(extCxMatch[1], 10);
+          const rawH = parseInt(extCxMatch[2], 10);
           
-          const xAttr = offAttrs.match(/x="(-?\d+)"/);
-          const yAttr = offAttrs.match(/y="(-?\d+)"/);
-          const cxAttr = extAttrs.match(/cx="(\d+)"/);
-          const cyAttr = extAttrs.match(/cy="(\d+)"/);
+          let pctX = Math.round((rawX / slideWidth) * 100);
+          let pctY = Math.round((rawY / slideHeight) * 100);
+          let pctW = Math.round((rawW / slideWidth) * 100);
+          let pctH = Math.round((rawH / slideHeight) * 100);
           
-          if (xAttr && yAttr && cxAttr && cyAttr) {
-            const rawX = parseInt(xAttr[1], 10);
-            const rawY = parseInt(yAttr[1], 10);
-            const rawW = parseInt(cxAttr[1], 10);
-            const rawH = parseInt(cyAttr[1], 10);
-            
-            let pctX = Math.round((rawX / slideWidth) * 100);
-            let pctY = Math.round((rawY / slideHeight) * 100);
-            let pctW = Math.round((rawW / slideWidth) * 100);
-            let pctH = Math.round((rawH / slideHeight) * 100);
-            
-            if (pctX < 0) pctX = 5;
-            if (pctY < 0) pctY = 5;
-            if (pctW > 100) pctW = 90;
-            if (pctH > 100) pctH = 90;
-            
-            const embedMatch = picContent.match(/r:embed="([^"]+)"/) || picContent.match(/embed="([^"]+)"/);
-            let imgDataUrl = null;
-            if (embedMatch) {
-              const rId = embedMatch[1];
-              imgDataUrl = relsMap[rId] || null;
-            }
-            
-            const rotMatch = picContent.match(/rot="(\d+)"/) || picContent.match(/<a:xfrm[^>]*?rot="(\d+)"/);
-            const rotation = rotMatch ? Math.round(parseInt(rotMatch[1], 10) / 60000) : 0;
-            
-            elementCounter++;
-            if (imgDataUrl) {
-              elements.push({
-                id: `pic-${slideIndex}-${elementCounter}`,
-                type: 'image',
-                content: imgDataUrl,
-                x: pctX,
-                y: pctY,
-                w: pctW,
-                h: pctH,
-                rotation: rotation,
-                animation: 'fade-in',
-                step: stepCounter++
-              });
-            } else {
-              elements.push({
-                id: `pic-${slideIndex}-${elementCounter}`,
-                type: 'shape',
-                shapeType: 'rect',
-                x: pctX,
-                y: pctY,
-                w: pctW,
-                h: pctH,
-                color: '#f8fafc',
-                text: '🖼️ [Secured Image Asset]',
-                border: 'border-dashed border-slate-355 text-slate-500 bg-slate-50',
-                animation: 'fade-in',
-                step: stepCounter++
-              });
-            }
+          if (pctX < 0) pctX = 0;
+          if (pctY < 0) pctY = 0;
+          if (pctW > 100) pctW = 100;
+          if (pctH > 100) pctH = 100;
+          
+          const embedMatch = picContent.match(/r:embed="([^"]+)"/) || picContent.match(/embed="([^"]+)"/);
+          let imgDataUrl = null;
+          if (embedMatch) {
+            const rId = embedMatch[1];
+            imgDataUrl = relsMap[rId] || null;
+          }
+          
+          const rotMatch = picContent.match(/<a:xfrm[^>]*rot="(\d+)"/);
+          const rotation = rotMatch ? Math.round(parseInt(rotMatch[1], 10) / 60000) : 0;
+          
+          // Determine if this is a full-slide background image
+          const isFullSlide = rawX === 0 && rawY === 0 && rawW >= slideWidth * 0.95;
+          
+          elementCounter++;
+          if (imgDataUrl) {
+            elements.push({
+              id: `pic-${slideIndex}-${elementCounter}`,
+              type: 'image',
+              content: imgDataUrl,
+              x: pctX,
+              y: pctY,
+              w: pctW,
+              h: pctH,
+              isBackground: isFullSlide,
+              rotation: rotation,
+              animation: 'fade-in',
+              step: 0  // Background images always visible
+            });
+          } else {
+            elements.push({
+              id: `pic-${slideIndex}-${elementCounter}`,
+              type: 'shape',
+              shapeType: 'rect',
+              x: pctX,
+              y: pctY,
+              w: pctW,
+              h: pctH,
+              color: '#f8fafc',
+              text: '🖼️',
+              border: 'border-dashed border-slate-355 text-slate-500 bg-slate-50',
+              animation: 'fade-in',
+              step: stepCounter++
+            });
           }
         }
       }
