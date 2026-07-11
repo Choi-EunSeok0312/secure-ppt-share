@@ -566,7 +566,7 @@ export default function LecturerPage() {
                       return (
                         <div
                           key={el.id}
-                          className={`absolute transition-all duration-500 flex flex-col ${justifyClass} text-left leading-relaxed ${opacityClass}`}
+                          className={`absolute transition-all duration-500 flex flex-col ${justifyClass} leading-relaxed ${opacityClass}`}
                           style={{
                             left: `${el.x}%`,
                             top: `${el.y}%`,
@@ -580,10 +580,11 @@ export default function LecturerPage() {
                               return (
                                 <h2
                                   key={pIdx}
-                                  className="font-bold text-slate-900 tracking-tight mb-4"
+                                  className="font-bold text-slate-900 tracking-tight mb-4 w-full"
                                   style={{
                                     fontSize: `${p.size}px`,
-                                    color: p.color
+                                    color: p.color,
+                                    textAlign: p.align || 'left'
                                   }}
                                 >
                                   {p.text}
@@ -594,10 +595,11 @@ export default function LecturerPage() {
                               return (
                                 <div
                                   key={pIdx}
-                                  className="flex items-start gap-2.5 text-slate-750 ml-4 mb-2.5 font-medium"
+                                  className="flex items-start gap-2.5 text-slate-750 ml-4 mb-2.5 font-medium w-full"
                                   style={{
                                     fontSize: `${p.size}px`,
-                                    color: p.color
+                                    color: p.color,
+                                    textAlign: p.align || 'left'
                                   }}
                                 >
                                   <span className="text-slate-400 font-bold select-none">•</span>
@@ -608,10 +610,11 @@ export default function LecturerPage() {
                             return (
                               <p
                                 key={pIdx}
-                                className="text-slate-650 mb-2 font-light"
+                                className="text-slate-650 mb-2 font-light w-full"
                                 style={{
                                   fontSize: `${p.size}px`,
-                                  color: p.color
+                                  color: p.color,
+                                  textAlign: p.align || 'left'
                                 }}
                               >
                                 {p.text}

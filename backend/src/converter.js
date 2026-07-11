@@ -185,6 +185,63 @@ function parseBackgroundElements(zip, xmlContent, relsMap, slideWidth, slideHeig
   while ((match = shapeRegex.exec(xmlContent)) !== null) {
     const shapeContent = match[1];
     
+    // Background layout shapes should NOT be standard placeholders
+    if (shapeContent.includes('<p:ph') || shapeContent.includes('<ph')) {
+      continue;
+    }
+    
+    // Extract text runs if any
+    const pRegex = /<a:p>([\s\S]*?)<\/a:p>/g;
+    let pMatch;
+    const parsedParagraphs = [];
+    while ((pMatch = pRegex.exec(shapeContent)) !== null) {
+      const pContent = pMatch[1];
+      const tRegex = /<a:t>([^<]*)<\/a:t>/g;
+      let tMatch;
+      let paraText = '';
+      while ((tMatch = tRegex.exec(pContent)) !== null) {
+        paraText += tMatch[1];
+      }
+      
+      if (!paraText.trim()) continue;
+      
+      let fontPt = 18;
+      const szMatch = pContent.match(/sz="(\d+)"/);
+      if (szMatch) {
+        fontPt = parseInt(szMatch[1], 10) / 100;
+      }
+      
+      let pColor = '#334155';
+      const clrMatch = pContent.match(/<a:srgbClr\s+val="([0-9a-fA-F]{6})"/);
+      if (clrMatch) {
+        pColor = `#${clrMatch[1]}`;
+      } else {
+        const schemeMatch = pContent.match(/<a:schemeClr\s+val="([^"]+)"/);
+        if (schemeMatch) {
+          const schemeVal = schemeMatch[1];
+          if (schemeVal.includes('accent1')) pColor = '#ea580c';
+          else if (schemeVal.includes('accent2')) pColor = '#3b82f6';
+          else if (schemeVal.includes('accent3')) pColor = '#10b981';
+        }
+      }
+      
+      let align = 'left';
+      const algnMatch = pContent.match(/algn="([^"]+)"/);
+      if (algnMatch) {
+        if (algnMatch[1] === 'ctr') align = 'center';
+        else if (algnMatch[1] === 'r') align = 'right';
+      }
+      
+      parsedParagraphs.push({
+        text: paraText.trim(),
+        isHeading: fontPt >= 24,
+        isBullet: false,
+        size: Math.round(fontPt * 0.95),
+        color: pColor,
+        align: align
+      });
+    }
+    
     let fillColor = null;
     const solidFillMatch = shapeContent.match(/<a:solidFill>([\s\S]*?)<\/a:solidFill>/);
     if (solidFillMatch) {
@@ -205,10 +262,7 @@ function parseBackgroundElements(zip, xmlContent, relsMap, slideWidth, slideHeig
       }
     }
     
-    if (!fillColor) continue;
-    if (shapeContent.includes('type="title"') || shapeContent.includes('type="body"') || shapeContent.includes('type="ctrTitle"')) {
-      continue;
-    }
+    if (!fillColor && parsedParagraphs.length === 0) continue;
     
     const offMatch = shapeContent.match(/<a:off\s+([^>]*?)>/) || shapeContent.match(/<off\s+([^>]*?)>/);
     const extMatch = shapeContent.match(/<a:ext\s+([^>]*?)>/) || shapeContent.match(/<ext\s+([^>]*?)>/);
@@ -242,22 +296,38 @@ function parseBackgroundElements(zip, xmlContent, relsMap, slideWidth, slideHeig
     const rotation = rotMatch ? Math.round(parseInt(rotMatch[1], 10) / 60000) : 0;
     
     elementCounter++;
-    elements.push({
-      id: `bg-shape-${elementCounter}`,
-      type: 'shape',
-      shapeType: 'rect',
-      geom: shapeGeom,
-      x: pctX,
-      y: pctY,
-      w: pctW,
-      h: pctH,
-      color: fillColor,
-      text: '',
-      border: '',
-      rotation: rotation,
-      animation: 'fade-in',
-      step: 0
-    });
+    if (parsedParagraphs.length > 0) {
+      elements.push({
+        id: `bg-text-${elementCounter}`,
+        type: 'richText',
+        x: pctX,
+        y: pctY,
+        w: pctW,
+        h: pctH,
+        anchor: 't',
+        rotation: rotation,
+        paragraphs: parsedParagraphs,
+        animation: 'fade-in',
+        step: 0
+      });
+    } else {
+      elements.push({
+        id: `bg-shape-${elementCounter}`,
+        type: 'shape',
+        shapeType: 'rect',
+        geom: shapeGeom,
+        x: pctX,
+        y: pctY,
+        w: pctW,
+        h: pctH,
+        color: fillColor,
+        text: '',
+        border: '',
+        rotation: rotation,
+        animation: 'fade-in',
+        step: 0
+      });
+    }
   }
   
   // 2. Extract background layout pictures <p:pic>
@@ -567,7 +637,7 @@ function parsePptxFile(filePath, title) {
         const pRegex = /<a:p>([\s\S]*?)<\/a:p>/g;
         let pMatch;
         const parsedParagraphs = [];
-        const isTitlePlaceholder = shapeContent.includes('type="title"') || shapeContent.includes('type="ctrTitle"') || shapeContent.includes('type="subTitle"');
+        const isTitlePlaceholder = shapeContent.includes('type="title"') || shapeContent.includes('type="ctrTitle"') || (slideIndex === 1 && shapeContent.includes('type="subTitle"'));
         
         while ((pMatch = pRegex.exec(shapeContent)) !== null) {
           const pContent = pMatch[1];
@@ -598,6 +668,13 @@ function parsePptxFile(filePath, title) {
             pColor = `#${clrMatch[1]}`;
           }
           
+          let align = 'left';
+          const algnMatch = pContent.match(/algn="([^"]+)"/);
+          if (algnMatch) {
+            if (algnMatch[1] === 'ctr') align = 'center';
+            else if (algnMatch[1] === 'r') align = 'right';
+          }
+          
           const isHeading = (parsedParagraphs.length === 0) && (isTitlePlaceholder || (!isBullet && fontPt >= 24));
           
           parsedParagraphs.push({
@@ -605,7 +682,8 @@ function parsePptxFile(filePath, title) {
             isHeading: isHeading,
             isBullet: isBullet,
             size: Math.round(fontPt * 0.95),
-            color: isHeading && pColor === '#334155' ? '#0f172a' : pColor
+            color: isHeading && pColor === '#334155' ? '#0f172a' : pColor,
+            align: align
           });
         }
         

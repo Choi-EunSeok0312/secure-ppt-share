@@ -245,9 +245,9 @@
       "ownerId": "lecturer-sarah"
     },
     {
-      "id": "pres-1783743735679",
+      "id": "pres-1783744033406",
       "title": "macroeconomics",
-      "uploadDate": "2026-07-11T04:22:15.739Z",
+      "uploadDate": "2026-07-11T04:27:13.467Z",
       "slides": [
         {
           "slideIndex": 1,
@@ -261,6 +261,7 @@
               "y": 9,
               "w": 4,
               "h": 7,
+              "rotation": 90,
               "animation": "fade-in",
               "step": 0
             },
@@ -272,16 +273,19 @@
               "y": 25,
               "w": 56,
               "h": 51,
+              "rotation": 90,
               "animation": "fade-in",
               "step": 0
             },
             {
               "id": "el-1-4",
               "type": "richText",
-              "x": 13,
-              "y": 17,
-              "w": 74,
+              "x": 7,
+              "y": 18,
+              "w": 84,
               "h": 14,
+              "anchor": "ctr",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Monetary Policy and Fiscal Policy",
@@ -304,10 +308,12 @@
             {
               "id": "el-1-5",
               "type": "richText",
-              "x": 14,
-              "y": 30,
+              "x": 7,
+              "y": 33,
               "w": 60,
-              "h": 14,
+              "h": 52,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Taillandier Eline 202301116",
@@ -328,6 +334,7 @@
               "y": 35,
               "w": 29,
               "h": 35,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 3
             }
@@ -349,6 +356,7 @@
               "color": "#FF9900",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -364,6 +372,7 @@
               "color": "#F47C00",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -375,6 +384,7 @@
               "y": -7,
               "w": 20,
               "h": 70,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -386,6 +396,7 @@
               "y": 37,
               "w": 20,
               "h": 70,
+              "rotation": 180,
               "animation": "fade-in",
               "step": 0
             },
@@ -393,9 +404,11 @@
               "id": "el-2-5",
               "type": "richText",
               "x": 52,
-              "y": 16,
+              "y": 19,
               "w": 39,
               "h": 13,
+              "anchor": "ctr",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Advantages of Monetary Policy",
@@ -412,9 +425,11 @@
               "id": "el-2-6",
               "type": "richText",
               "x": 52,
-              "y": 37,
+              "y": 38,
               "w": 39,
               "h": 53,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Flexibility",
@@ -449,6 +464,7 @@
               "y": 22,
               "w": 31,
               "h": 55,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 2
             }
@@ -470,6 +486,7 @@
               "color": "#FF9900",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -485,6 +502,7 @@
               "color": "#F47C00",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -496,6 +514,7 @@
               "y": -7,
               "w": 20,
               "h": 70,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -507,6 +526,7 @@
               "y": 37,
               "w": 20,
               "h": 70,
+              "rotation": 180,
               "animation": "fade-in",
               "step": 0
             },
@@ -514,9 +534,11 @@
               "id": "el-3-5",
               "type": "richText",
               "x": 52,
-              "y": 16,
-              "w": 45,
+              "y": 19,
+              "w": 39,
               "h": 13,
+              "anchor": "ctr",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Disadvantages of Monetary Policy",
@@ -533,9 +555,11 @@
               "id": "el-3-6",
               "type": "richText",
               "x": 52,
-              "y": 37,
+              "y": 38,
               "w": 39,
               "h": 53,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Time Lag",
@@ -570,6 +594,7 @@
               "y": 38,
               "w": 48,
               "h": 55,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 2
             }
@@ -591,6 +616,7 @@
               "color": "#FF9900",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -606,6 +632,7 @@
               "color": "#F47C00",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -617,6 +644,7 @@
               "y": -7,
               "w": 20,
               "h": 70,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -628,6 +656,7 @@
               "y": 37,
               "w": 20,
               "h": 70,
+              "rotation": 180,
               "animation": "fade-in",
               "step": 0
             },
@@ -635,9 +664,11 @@
               "id": "el-4-5",
               "type": "richText",
               "x": 52,
-              "y": 16,
-              "w": 45,
+              "y": 19,
+              "w": 39,
               "h": 13,
+              "anchor": "ctr",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Advantages of Fiscal Policy",
@@ -654,9 +685,11 @@
               "id": "el-4-6",
               "type": "richText",
               "x": 52,
-              "y": 33,
+              "y": 38,
               "w": 39,
-              "h": 72,
+              "h": 53,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Direct impact",
@@ -691,6 +724,7 @@
               "y": 24,
               "w": 30,
               "h": 53,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 2
             }
@@ -712,6 +746,7 @@
               "color": "#FF9900",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -727,6 +762,7 @@
               "color": "#F47C00",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -738,6 +774,7 @@
               "y": -7,
               "w": 20,
               "h": 70,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -749,6 +786,7 @@
               "y": 37,
               "w": 20,
               "h": 70,
+              "rotation": 180,
               "animation": "fade-in",
               "step": 0
             },
@@ -756,9 +794,11 @@
               "id": "el-5-5",
               "type": "richText",
               "x": 52,
-              "y": 16,
+              "y": 19,
               "w": 39,
               "h": 13,
+              "anchor": "ctr",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Disadvantages of Fiscal Policy",
@@ -775,9 +815,11 @@
               "id": "el-5-6",
               "type": "richText",
               "x": 52,
-              "y": 33,
+              "y": 38,
               "w": 39,
-              "h": 72,
+              "h": 53,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Political Pressures",
@@ -812,6 +854,7 @@
               "y": 26,
               "w": 28,
               "h": 50,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 2
             }
@@ -833,6 +876,7 @@
               "color": "#FF9900",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -848,6 +892,7 @@
               "color": "#F47C00",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -859,6 +904,7 @@
               "y": -7,
               "w": 20,
               "h": 70,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -870,6 +916,7 @@
               "y": 37,
               "w": 20,
               "h": 70,
+              "rotation": 180,
               "animation": "fade-in",
               "step": 0
             },
@@ -881,6 +928,7 @@
               "y": 15,
               "w": 54,
               "h": 72,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 2
             }
@@ -902,6 +950,7 @@
               "color": "#FF9900",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -917,6 +966,7 @@
               "color": "#F47C00",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -928,6 +978,7 @@
               "y": -7,
               "w": 20,
               "h": 70,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -939,16 +990,19 @@
               "y": 37,
               "w": 20,
               "h": 70,
+              "rotation": 180,
               "animation": "fade-in",
               "step": 0
             },
             {
               "id": "el-7-5",
               "type": "richText",
-              "x": 55,
+              "x": 52,
               "y": 19,
               "w": 39,
               "h": 13,
+              "anchor": "ctr",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Economic Reforms and GDP Growth",
@@ -964,10 +1018,12 @@
             {
               "id": "el-7-6",
               "type": "richText",
-              "x": 55,
-              "y": 35,
+              "x": 52,
+              "y": 38,
               "w": 39,
               "h": 53,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Initiated economic reforms in 1978",
@@ -1009,6 +1065,7 @@
               "y": 28,
               "w": 53,
               "h": 53,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 2
             }
@@ -1021,10 +1078,12 @@
             {
               "id": "el-8-1",
               "type": "richText",
-              "x": 14,
-              "y": 8,
-              "w": 73,
-              "h": 8,
+              "x": 3,
+              "y": 9,
+              "w": 93,
+              "h": 11,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Growth Moderation in the Last Decade",
@@ -1044,6 +1103,8 @@
               "y": 60,
               "w": 25,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Slowed growth productivity",
@@ -1063,6 +1124,8 @@
               "y": 27,
               "w": 25,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Diminishing returns on investment",
@@ -1082,6 +1145,8 @@
               "y": 60,
               "w": 24,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Declining labor force growth",
@@ -1101,6 +1166,8 @@
               "y": 27,
               "w": 24,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Structural constraints leading to moderation in growth",
@@ -1121,6 +1188,7 @@
               "y": 35,
               "w": 42,
               "h": 38,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 5
             }
@@ -1142,6 +1210,7 @@
               "color": "#FF9900",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1157,6 +1226,7 @@
               "color": "#F47C00",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1168,6 +1238,7 @@
               "y": -7,
               "w": 20,
               "h": 70,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1179,6 +1250,7 @@
               "y": 37,
               "w": 20,
               "h": 70,
+              "rotation": 180,
               "animation": "fade-in",
               "step": 0
             },
@@ -1187,8 +1259,10 @@
               "type": "richText",
               "x": 52,
               "y": 19,
-              "w": 45,
+              "w": 39,
               "h": 13,
+              "anchor": "ctr",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Monetary policies in China",
@@ -1208,6 +1282,8 @@
               "y": 38,
               "w": 39,
               "h": 53,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Lowering reserve ratio in key economic support areas",
@@ -1249,6 +1325,7 @@
               "y": 19,
               "w": 33,
               "h": 59,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 2
             }
@@ -1265,6 +1342,8 @@
               "y": 28,
               "w": 32,
               "h": 25,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Special loans for small and medium-sized enterprises",
@@ -1284,6 +1363,8 @@
               "y": 62,
               "w": 32,
               "h": 25,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Financial support for agricultural enterprises and real estate",
@@ -1303,6 +1384,8 @@
               "y": 28,
               "w": 32,
               "h": 25,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Flexible re-loan limits",
@@ -1322,6 +1405,8 @@
               "y": 62,
               "w": 32,
               "h": 25,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Reduced financial costs for businesses",
@@ -1340,7 +1425,9 @@
               "x": 14,
               "y": 8,
               "w": 73,
-              "h": 11,
+              "h": 8,
+              "anchor": "ctr",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Enhanced Financial Support",
@@ -1361,6 +1448,7 @@
               "y": 34,
               "w": 15,
               "h": 26,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 5
             }
@@ -1382,6 +1470,7 @@
               "color": "#ea580c",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1397,6 +1486,7 @@
               "color": "#437DB2",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1412,6 +1502,7 @@
               "color": "#ea580c",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1427,6 +1518,7 @@
               "color": "#325D85",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1442,6 +1534,7 @@
               "color": "#3b82f6",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1457,6 +1550,7 @@
               "color": "#3b82f6",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1472,6 +1566,7 @@
               "color": "#3b82f6",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1487,6 +1582,7 @@
               "color": "#3b82f6",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1497,6 +1593,8 @@
               "y": 27,
               "w": 25,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Continued crackdown on corruption at financial institutions",
@@ -1516,6 +1614,8 @@
               "y": 65,
               "w": 25,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Management and supervision of the financial system",
@@ -1535,6 +1635,8 @@
               "y": 27,
               "w": 25,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Prevention of system risks",
@@ -1554,6 +1656,8 @@
               "y": 65,
               "w": 25,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Emergency measures for large commercial banks",
@@ -1573,6 +1677,8 @@
               "y": 8,
               "w": 73,
               "h": 8,
+              "anchor": "ctr",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Strengthening Financial System",
@@ -1603,6 +1709,7 @@
               "color": "#FF9900",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1618,6 +1725,7 @@
               "color": "#F47C00",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1629,6 +1737,7 @@
               "y": -7,
               "w": 20,
               "h": 70,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1640,16 +1749,19 @@
               "y": 37,
               "w": 20,
               "h": 70,
+              "rotation": 180,
               "animation": "fade-in",
               "step": 0
             },
             {
               "id": "el-12-5",
               "type": "richText",
-              "x": 42,
-              "y": 15,
-              "w": 52,
-              "h": 17,
+              "x": 52,
+              "y": 19,
+              "w": 39,
+              "h": 13,
+              "anchor": "ctr",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Fiscal policies in China",
@@ -1665,10 +1777,12 @@
             {
               "id": "el-12-6",
               "type": "richText",
-              "x": 41,
-              "y": 32,
-              "w": 56,
-              "h": 59,
+              "x": 52,
+              "y": 38,
+              "w": 39,
+              "h": 53,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Policy measures to stabilize employment, increase income, and promote consumption",
@@ -1710,6 +1824,7 @@
               "y": 27,
               "w": 38,
               "h": 53,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 2
             }
@@ -1726,6 +1841,8 @@
               "y": 27,
               "w": 24,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Issuing bonds for local governments to accelerate major projects",
@@ -1745,6 +1862,8 @@
               "y": 60,
               "w": 24,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Investment focus on new and renewable energy, science and technology sectors",
@@ -1764,6 +1883,8 @@
               "y": 27,
               "w": 25,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Balanced development between provinces and farmers",
@@ -1783,6 +1904,8 @@
               "y": 60,
               "w": 25,
               "h": 24,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "New urbanization strategies for sustainable growth",
@@ -1798,10 +1921,12 @@
             {
               "id": "el-13-5",
               "type": "richText",
-              "x": 6,
-              "y": 10,
-              "w": 73,
-              "h": 7,
+              "x": 3,
+              "y": 9,
+              "w": 93,
+              "h": 11,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "A Balanced Development",
@@ -1822,6 +1947,7 @@
               "y": 37,
               "w": 36,
               "h": 37,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 5
             }
@@ -1843,6 +1969,7 @@
               "color": "#FF9900",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1858,6 +1985,7 @@
               "color": "#F47C00",
               "text": "",
               "border": "",
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1869,6 +1997,7 @@
               "y": -7,
               "w": 20,
               "h": 70,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 0
             },
@@ -1880,6 +2009,7 @@
               "y": 37,
               "w": 20,
               "h": 70,
+              "rotation": 180,
               "animation": "fade-in",
               "step": 0
             },
@@ -1887,9 +2017,11 @@
               "id": "el-14-5",
               "type": "richText",
               "x": 52,
-              "y": 21,
+              "y": 38,
               "w": 39,
-              "h": 61,
+              "h": 53,
+              "anchor": "t",
+              "rotation": 0,
               "paragraphs": [
                 {
                   "text": "Room for intensive investment in the second half of the year",
@@ -1931,6 +2063,7 @@
               "y": 12,
               "w": 29,
               "h": 76,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 1
             }
@@ -1948,6 +2081,7 @@
               "y": 9,
               "w": 4,
               "h": 7,
+              "rotation": 90,
               "animation": "fade-in",
               "step": 0
             },
@@ -1959,6 +2093,7 @@
               "y": 25,
               "w": 56,
               "h": 51,
+              "rotation": 90,
               "animation": "fade-in",
               "step": 0
             },
@@ -1970,6 +2105,7 @@
               "y": 24,
               "w": 65,
               "h": 52,
+              "rotation": 0,
               "animation": "fade-in",
               "step": 3
             }
