@@ -94,6 +94,76 @@ function parseLayoutMasterRelations(zip, relsPath) {
 }
 
 /**
+ * Builds a placeholder coordinate map by parsing the Master and Layout template specifications.
+ */
+function buildPlaceholderMap(zip, layoutPath) {
+  const phMap = {};
+  if (!layoutPath) return phMap;
+  
+  try {
+    // 1. Base Master placeholders
+    const masterPath = getSlideMasterPath(zip, layoutPath);
+    if (masterPath) {
+      const masterEntry = zip.getEntry(masterPath);
+      if (masterEntry) {
+        const masterXml = masterEntry.getData().toString('utf8');
+        extractPHCoords(masterXml, phMap);
+      }
+    }
+    
+    // 2. Override Layout placeholders
+    const layoutEntry = zip.getEntry(layoutPath);
+    if (layoutEntry) {
+      const layoutXml = layoutEntry.getData().toString('utf8');
+      extractPHCoords(layoutXml, phMap);
+    }
+  } catch (e) {
+    console.error(`Failed to build layout placeholder map for ${layoutPath}:`, e);
+  }
+  return phMap;
+}
+
+/**
+ * Helper to extract coordinates from XML shapes carrying placeholder tags.
+ */
+function extractPHCoords(xmlContent, phMap) {
+  const shapeRegex = /<p:sp>([\s\S]*?)<\/p:sp>/g;
+  let match;
+  while ((match = shapeRegex.exec(xmlContent)) !== null) {
+    const shapeContent = match[1];
+    
+    const phMatch = shapeContent.match(/<p:ph\s+([^>]*?)>/) || shapeContent.match(/<ph\s+([^>]*?)>/);
+    if (!phMatch) continue;
+    
+    const phAttrs = phMatch[1];
+    const typeMatch = phAttrs.match(/type="([^"]+)"/);
+    const idxMatch = phAttrs.match(/idx="(\d+)"/);
+    
+    const offMatch = shapeContent.match(/<a:off\s+([^>]*?)>/) || shapeContent.match(/<off\s+([^>]*?)>/);
+    const extMatch = shapeContent.match(/<a:ext\s+([^>]*?)>/) || shapeContent.match(/<ext\s+([^>]*?)>/);
+    
+    if (offMatch && extMatch) {
+      const xAttr = offMatch[1].match(/x="(-?\d+)"/);
+      const yAttr = offMatch[1].match(/y="(-?\d+)"/);
+      const cxAttr = extMatch[1].match(/cx="(\d+)"/);
+      const cyAttr = extMatch[1].match(/cy="(\d+)"/);
+      
+      if (xAttr && yAttr && cxAttr && cyAttr) {
+        const coords = {
+          x: parseInt(xAttr[1], 10),
+          y: parseInt(yAttr[1], 10),
+          w: parseInt(cxAttr[1], 10),
+          h: parseInt(cyAttr[1], 10)
+        };
+        
+        if (typeMatch) phMap[typeMatch[1]] = coords;
+        if (idxMatch) phMap[idxMatch[1]] = coords;
+      }
+    }
+  }
+}
+
+/**
  * Extracts background elements (decorative shapes and background pictures)
  * from slide layouts or masters to preserve visual presentation designs.
  */
@@ -328,7 +398,7 @@ function parsePptxFile(filePath, title) {
       
       const relsMap = parseRelations(zip, slideIndex);
       
-      // 1. Resolve Background Graphics from Layout & Master templates!
+      // 1. Parse template background graphics
       const bgElements = [];
       const layoutPath = getSlideLayoutPath(zip, slideIndex);
       
@@ -361,47 +431,79 @@ function parsePptxFile(filePath, title) {
         }
       }
       
-      // Prefix background element IDs to avoid collisions
+      // 2. Build coordinate placeholder map for this slide
+      const layoutPlaceholders = buildPlaceholderMap(zip, layoutPath);
+      
       bgElements.forEach((el, idx) => {
         el.id = `bg-slide-${slideIndex}-${idx}-${el.id}`;
       });
       
-      // Put background elements first so slide elements draw on top!
       const elements = [...bgElements];
       let elementCounter = elements.length;
       let stepCounter = 0;
       
-      // 2. Parse Slide Elements (Direct Children)
+      // 3. Parse Slide Elements (Direct Children)
       const shapeRegex = /<p:sp>([\s\S]*?)<\/p:sp>/g;
       let match;
       
       while ((match = shapeRegex.exec(slideXml)) !== null) {
         const shapeContent = match[1];
         
+        let shapeX = null, shapeY = null, shapeW = null, shapeH = null;
+        
+        // Check if placeholder
+        const phMatch = shapeContent.match(/<p:ph\s+([^>]*?)>/) || shapeContent.match(/<ph\s+([^>]*?)>/);
+        let phType = null;
+        let phIdx = null;
+        if (phMatch) {
+          const phAttrs = phMatch[1];
+          const typeMatch = phAttrs.match(/type="([^"]+)"/);
+          const idxMatch = phAttrs.match(/idx="(\d+)"/);
+          if (typeMatch) phType = typeMatch[1];
+          if (idxMatch) phIdx = idxMatch[1];
+        }
+        
+        // Get coordinates from local shape XML
         const offMatch = shapeContent.match(/<a:off\s+([^>]*?)>/) || shapeContent.match(/<off\s+([^>]*?)>/);
         const extMatch = shapeContent.match(/<a:ext\s+([^>]*?)>/) || shapeContent.match(/<ext\s+([^>]*?)>/);
         
-        if (!offMatch || !extMatch) continue;
+        if (offMatch && extMatch) {
+          const offAttrs = offMatch[1];
+          const extAttrs = extMatch[1];
+          
+          const xAttr = offAttrs.match(/x="(-?\d+)"/);
+          const yAttr = offAttrs.match(/y="(-?\d+)"/);
+          const cxAttr = extAttrs.match(/cx="(\d+)"/);
+          const cyAttr = extAttrs.match(/cy="(\d+)"/);
+          
+          if (xAttr && yAttr && cxAttr && cyAttr) {
+            shapeX = parseInt(xAttr[1], 10);
+            shapeY = parseInt(yAttr[1], 10);
+            shapeW = parseInt(cxAttr[1], 10);
+            shapeH = parseInt(cyAttr[1], 10);
+          }
+        }
         
-        const offAttrs = offMatch[1];
-        const extAttrs = extMatch[1];
+        // Fallback to Layout placeholder coordinates if slide XML contains no coordinates or default zero coordinate
+        if (phMatch && (shapeX === null || shapeX === 0 || shapeY === null || shapeY === 0)) {
+          const phCoords = (phIdx !== null ? layoutPlaceholders[phIdx] : null) || (phType !== null ? layoutPlaceholders[phType] : null);
+          if (phCoords) {
+            shapeX = phCoords.x;
+            shapeY = phCoords.y;
+            shapeW = phCoords.w;
+            shapeH = phCoords.h;
+          }
+        }
         
-        const xAttr = offAttrs.match(/x="(-?\d+)"/);
-        const yAttr = offAttrs.match(/y="(-?\d+)"/);
-        const cxAttr = extAttrs.match(/cx="(\d+)"/);
-        const cyAttr = extAttrs.match(/cy="(\d+)"/);
+        // Skip shape if we absolutely cannot resolve its layout boundaries
+        if (shapeX === null || shapeY === null || shapeW === null || shapeH === null) {
+          continue;
+        }
         
-        if (!xAttr || !yAttr || !cxAttr || !cyAttr) continue;
-        
-        const rawX = parseInt(xAttr[1], 10);
-        const rawY = parseInt(yAttr[1], 10);
-        const rawW = parseInt(cxAttr[1], 10);
-        const rawH = parseInt(cyAttr[1], 10);
-        
-        let pctX = Math.round((rawX / slideWidth) * 100);
-        let pctY = Math.round((rawY / slideHeight) * 100);
-        let pctW = Math.round((rawW / slideWidth) * 100);
-        let pctH = Math.round((rawH / slideHeight) * 100);
+        let pctX = Math.round((shapeX / slideWidth) * 100);
+        let pctY = Math.round((shapeY / slideHeight) * 100);
+        let pctW = Math.round((shapeW / slideWidth) * 100);
+        let pctH = Math.round((shapeH / slideHeight) * 100);
         
         if (pctX < 0) pctX = 5;
         if (pctY < 0) pctY = 5;
@@ -444,7 +546,6 @@ function parsePptxFile(filePath, title) {
           const hasBuNone = pContent.includes('<a:buNone/>') || pContent.includes('<buNone/>');
           const isExplicitBullet = pContent.includes('<a:buChar') || pContent.includes('<a:buAutoNum') || pContent.includes('buSz');
           
-          // PowerPoint bullet heuristic: any non-first paragraph inside a body list/placeholder is a bullet unless marked buNone
           const isBullet = isExplicitBullet || (parsedParagraphs.length > 0 && !hasBuNone);
           
           const tRegex = /<a:t>([^<]*)<\/a:t>/g;
@@ -468,7 +569,6 @@ function parsePptxFile(filePath, title) {
             pColor = `#${clrMatch[1]}`;
           }
           
-          // Limit heading type to the first paragraph only! Subsequent paragraphs represent list items.
           const isHeading = (parsedParagraphs.length === 0) && (isTitlePlaceholder || (!isBullet && fontPt >= 24));
           
           parsedParagraphs.push({
@@ -519,7 +619,7 @@ function parsePptxFile(filePath, title) {
         });
       }
       
-      // 3. Parse pictures <p:pic> (Direct embedded images)
+      // 4. Parse pictures <p:pic> (Direct embedded images)
       const picRegex = /<p:pic>([\s\S]*?)<\/p:pic>/g;
       let picMatch;
       while ((picMatch = picRegex.exec(slideXml)) !== null) {
