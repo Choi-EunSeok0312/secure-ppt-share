@@ -172,6 +172,85 @@ function extractPHCoords(xmlContent, phMap) {
 }
 
 /**
+ * Extracts a solid or image background fill explicitly defined in a <p:bg> element.
+ */
+function extractBackgroundFill(xmlContent, relsMap, idPrefix) {
+  const bgRegex = /<p:bg>([\s\S]*?)<\/p:bg>/;
+  const bgMatch = xmlContent.match(bgRegex);
+  if (!bgMatch) return null;
+
+  const bgContent = bgMatch[1];
+  
+  // 1. Picture Fill
+  const blipFillMatch = bgContent.match(/<a:blipFill>([\s\S]*?)<\/a:blipFill>/);
+  if (blipFillMatch) {
+    const fillContent = blipFillMatch[1];
+    const blipMatch = fillContent.match(/<a:blip[^>]*?r:embed="([^"]+)"/);
+    if (blipMatch) {
+      const rId = blipMatch[1];
+      const bgImgUrl = relsMap[rId];
+      if (bgImgUrl) {
+        return {
+          id: `${idPrefix}-bg-pic`,
+          type: 'image',
+          content: bgImgUrl,
+          x: 0,
+          y: 0,
+          w: 100,
+          h: 100,
+          rotation: 0,
+          animation: 'fade-in',
+          step: 0
+        };
+      }
+    }
+  }
+
+  // 2. Solid Color Fill
+  const solidFillMatch = bgContent.match(/<a:solidFill>([\s\S]*?)<\/a:solidFill>/);
+  if (solidFillMatch) {
+    const fillContent = solidFillMatch[1];
+    let bgColor = null;
+    
+    const srgbMatch = fillContent.match(/<a:srgbClr\s+val="([0-9a-fA-F]{6})"/);
+    if (srgbMatch) {
+      bgColor = `#${srgbMatch[1]}`;
+    } else {
+      const schemeMatch = fillContent.match(/<a:schemeClr\s+val="([^"]+)"/);
+      if (schemeMatch) {
+        const schemeVal = schemeMatch[1];
+        if (schemeVal.includes('accent1')) bgColor = '#ea580c';
+        else if (schemeVal.includes('accent2')) bgColor = '#3b82f6';
+        else if (schemeVal.includes('accent3')) bgColor = '#10b981';
+        else if (schemeVal.includes('bg1')) bgColor = '#ffffff';
+        else if (schemeVal.includes('tx1')) bgColor = '#0f172a';
+      }
+    }
+    
+    if (bgColor) {
+      return {
+        id: `${idPrefix}-bg-solid`,
+        type: 'shape',
+        shapeType: 'rect',
+        geom: 'rect',
+        x: 0,
+        y: 0,
+        w: 100,
+        h: 100,
+        color: bgColor,
+        text: '',
+        border: '',
+        rotation: 0,
+        animation: 'fade-in',
+        step: 0
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
  * Extracts background elements (decorative shapes and background pictures)
  * from slide layouts or masters to preserve visual presentation designs.
  */
@@ -497,26 +576,42 @@ function parsePptxFile(filePath, title) {
           const layoutRelsPath = `${layoutDir}/_rels/${layoutFile}.rels`;
           const layoutRelsMap = parseLayoutMasterRelations(zip, layoutRelsPath);
           
-          const layoutBg = parseBackgroundElements(zip, layoutXml, layoutRelsMap, slideWidth, slideHeight);
-          bgElements.push(...layoutBg);
-          
           const masterPath = getSlideMasterPath(zip, layoutPath);
+          let masterXml = null;
+          let masterRelsMap = {};
           if (masterPath) {
             const masterEntry = zip.getEntry(masterPath);
             if (masterEntry) {
-              const masterXml = masterEntry.getData().toString('utf8');
+              masterXml = masterEntry.getData().toString('utf8');
               const masterDir = path.dirname(masterPath);
               const masterFile = path.basename(masterPath);
               const masterRelsPath = `${masterDir}/_rels/${masterFile}.rels`;
-              const masterRelsMap = parseLayoutMasterRelations(zip, masterRelsPath);
+              masterRelsMap = parseLayoutMasterRelations(zip, masterRelsPath);
               
+              // Apply Master Background Fill
+              const masterBgFill = extractBackgroundFill(masterXml, masterRelsMap, `master-${slideIndex}`);
+              if (masterBgFill) bgElements.push(masterBgFill);
+              
+              // Apply Master Decoration Elements
               const masterBg = parseBackgroundElements(zip, masterXml, masterRelsMap, slideWidth, slideHeight);
               bgElements.push(...masterBg);
             }
           }
+
+          // Apply Layout Background Fill
+          const layoutBgFill = extractBackgroundFill(layoutXml, layoutRelsMap, `layout-${slideIndex}`);
+          if (layoutBgFill) bgElements.push(layoutBgFill);
+          
+          // Apply Layout Decoration Elements
+          const layoutBg = parseBackgroundElements(zip, layoutXml, layoutRelsMap, slideWidth, slideHeight);
+          bgElements.push(...layoutBg);
         }
       }
       
+      // Apply Slide Background Fill (Overrides master and layout)
+      const slideBgFill = extractBackgroundFill(slideXml, relsMap, `slide-${slideIndex}`);
+      if (slideBgFill) bgElements.push(slideBgFill);
+
       // 2. Build coordinate placeholder map for this slide
       const layoutPlaceholders = buildPlaceholderMap(zip, layoutPath);
       
@@ -550,8 +645,29 @@ function parsePptxFile(filePath, title) {
           if (idxMatch) phIdx = idxMatch[1];
         }
         
-        // Priority check: always use layout placeholder geometry if layout is mapped
-        if (phMatch) {
+        // 1. Get coordinates from local shape XML if present
+        const offMatch = shapeContent.match(/<a:off\s+([^>]*?)>/) || shapeContent.match(/<off\s+([^>]*?)>/);
+        const extMatch = shapeContent.match(/<a:ext\s+([^>]*?)>/) || shapeContent.match(/<ext\s+([^>]*?)>/);
+        
+        if (offMatch && extMatch) {
+          const offAttrs = offMatch[1];
+          const extAttrs = extMatch[1];
+          
+          const xAttr = offAttrs.match(/x="(-?\d+)"/);
+          const yAttr = offAttrs.match(/y="(-?\d+)"/);
+          const cxAttr = extAttrs.match(/cx="(\d+)"/);
+          const cyAttr = extAttrs.match(/cy="(\d+)"/);
+          
+          if (xAttr && yAttr && cxAttr && cyAttr) {
+            shapeX = parseInt(xAttr[1], 10);
+            shapeY = parseInt(yAttr[1], 10);
+            shapeW = parseInt(cxAttr[1], 10);
+            shapeH = parseInt(cyAttr[1], 10);
+          }
+        }
+        
+        // 2. Fallback to Layout placeholder coordinates only if slide XML contains no coordinates or default zero coordinate
+        if (phMatch && (shapeX === null || shapeX === 0 || shapeY === null || shapeY === 0)) {
           const phCoords = (phIdx !== null ? layoutPlaceholders[phIdx] : null) || (phType !== null ? layoutPlaceholders[phType] : null);
           if (phCoords) {
             shapeX = phCoords.x;
@@ -562,26 +678,11 @@ function parsePptxFile(filePath, title) {
           }
         }
         
-        // Fallback: If not matching layout, read local coordinates
-        if (shapeX === null || shapeY === null) {
-          const offMatch = shapeContent.match(/<a:off\s+([^>]*?)>/) || shapeContent.match(/<off\s+([^>]*?)>/);
-          const extMatch = shapeContent.match(/<a:ext\s+([^>]*?)>/) || shapeContent.match(/<ext\s+([^>]*?)>/);
-          
-          if (offMatch && extMatch) {
-            const offAttrs = offMatch[1];
-            const extAttrs = extMatch[1];
-            
-            const xAttr = offAttrs.match(/x="(-?\d+)"/);
-            const yAttr = offAttrs.match(/y="(-?\d+)"/);
-            const cxAttr = extAttrs.match(/cx="(\d+)"/);
-            const cyAttr = extAttrs.match(/cy="(\d+)"/);
-            
-            if (xAttr && yAttr && cxAttr && cyAttr) {
-              shapeX = parseInt(xAttr[1], 10);
-              shapeY = parseInt(yAttr[1], 10);
-              shapeW = parseInt(cxAttr[1], 10);
-              shapeH = parseInt(cyAttr[1], 10);
-            }
+        // 3. Fallback: If still null, try using layout placeholder for anchors/styles even if coordinates are custom
+        if (phMatch && shapeAnchor === 't') {
+          const phCoords = (phIdx !== null ? layoutPlaceholders[phIdx] : null) || (phType !== null ? layoutPlaceholders[phType] : null);
+          if (phCoords && phCoords.anchor) {
+            shapeAnchor = phCoords.anchor;
           }
         }
         
@@ -826,7 +927,7 @@ function parsePptxFile(filePath, title) {
       slides.push({
         slideIndex: slideIndex,
         title: `Slide ${slideIndex}`,
-        elements: elements
+        elements: [...bgElements, ...elements]
       });
     });
     

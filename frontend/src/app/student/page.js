@@ -209,10 +209,10 @@ export default function StudentPage() {
               <div className="text-slate-455 text-sm font-light">Waiting for presentation data...</div>
             ) : (
               // Secure Presentation Canvas (Scaled for student display)
-              <div className="w-[800px] h-[450px] relative bg-white rounded-xl shadow-lg p-8 overflow-hidden border border-slate-200 scale-90 md:scale-100 transition-transform">
+              <div className="w-[800px] h-[450px] relative bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200 scale-90 md:scale-100 transition-transform" style={{ containerType: 'inline-size' }}>
                 
                 {/* SVG/HTML Content Reconstructed absolutely */}
-                <div className="relative w-full h-[360px]">
+                <div className="w-full h-full relative">
                   {currentSlide.elements.map((el) => {
                     const isVisible = el.step <= animationStep;
                     const opacityClass = isVisible ? 'opacity-100' : 'opacity-0 scale-95 pointer-events-none';
@@ -226,7 +226,7 @@ export default function StudentPage() {
                             left: `${el.x}%`, 
                             top: `${el.y}%`, 
                             width: el.w ? `${el.w}%` : 'auto',
-                            fontSize: `${el.size}px`, 
+                            fontSize: `${(el.size / 9.6).toFixed(3)}cqw`, 
                             color: el.color 
                           }}
                         >
@@ -243,7 +243,7 @@ export default function StudentPage() {
                             left: `${el.x}%`, 
                             top: `${el.y}%`, 
                             width: el.w ? `${el.w}%` : 'auto',
-                            fontSize: `${el.size}px` 
+                            fontSize: `${(el.size / 9.6).toFixed(3)}cqw` 
                           }}
                         >
                           {el.content}
@@ -265,7 +265,7 @@ export default function StudentPage() {
                             <li 
                               key={idx} 
                               className="flex items-start gap-2 text-slate-700"
-                              style={{ fontSize: `${el.size}px`, color: el.color }}
+                              style={{ fontSize: `${(el.size / 9.6).toFixed(3)}cqw`, color: el.color }}
                             >
                               <span className="text-slate-400 font-bold leading-none select-none">•</span>
                               <span>{item}</span>
@@ -356,7 +356,7 @@ export default function StudentPage() {
                                   key={pIdx}
                                   className="font-bold text-slate-900 tracking-tight mb-4 w-full"
                                   style={{
-                                    fontSize: `${p.size}px`,
+                                    fontSize: `${(p.size / 9.6).toFixed(3)}cqw`,
                                     color: p.color,
                                     textAlign: p.align || 'left'
                                   }}
@@ -371,7 +371,7 @@ export default function StudentPage() {
                                   key={pIdx}
                                   className="flex items-start gap-2.5 text-slate-750 ml-4 mb-2.5 font-medium w-full"
                                   style={{
-                                    fontSize: `${p.size}px`,
+                                    fontSize: `${(p.size / 9.6).toFixed(3)}cqw`,
                                     color: p.color,
                                     textAlign: p.align || 'left'
                                   }}
@@ -386,7 +386,7 @@ export default function StudentPage() {
                                 key={pIdx}
                                 className="text-slate-650 mb-2 font-light w-full"
                                 style={{
-                                  fontSize: `${p.size}px`,
+                                  fontSize: `${(p.size / 9.6).toFixed(3)}cqw`,
                                   color: p.color,
                                   textAlign: p.align || 'left'
                                 }}

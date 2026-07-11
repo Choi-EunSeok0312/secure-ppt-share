@@ -698,7 +698,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="p-4 text-right space-x-2">
                         <Link 
-                          href={`/lecturer?presentation=${pres.id}`}
+                          href={`/lecturer?presentation=${pres.id}&from=admin`}
                           className="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-sm transition-all"
                         >
                           <Play className="w-3 h-3 fill-current" /> Present
